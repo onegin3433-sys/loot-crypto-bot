@@ -41,8 +41,6 @@ def publish():
     now = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
 
     message = (
-        "💎 <b>LOOTVAULT | LOOT</b>\n"
-        "━━━━━━━━━━━━━━\n\n"
         f"💰 <b>Цена:</b> ${price:.8f}\n\n"
         f"⏱ <b>5 минут:</b> {trend(change_5m)}\n"
         f"🕐 <b>1 час:</b> {trend(change_1h)}\n"
