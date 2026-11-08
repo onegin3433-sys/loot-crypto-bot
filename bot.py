@@ -41,7 +41,7 @@ def publish():
     now = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
 
     message = (
-        f"💰 <b>Цена:</b> ${price:.8f}\n\n"
+        f"💰 </b> ${price:.8f}\n\n"
         f"⏱ <b>5 минут:</b> {trend(change_5m)}\n"
         f"🕐 <b>1 час:</b> {trend(change_1h)}\n"
         f"📊 <b>24 часа:</b> {trend(change_24h)}\n\n"
@@ -50,8 +50,6 @@ def publish():
         "🔗 <a href='https://www.geckoterminal.com/ton/pools/"
         f"{POOL}'>Открыть график LOOT</a>\n\n"
         f"🕒 {now}\n"
-        "━━━━━━━━━━━━━━\n"
-        "🤖 Автоматическое обновление"
     )
 
     telegram_url = (
