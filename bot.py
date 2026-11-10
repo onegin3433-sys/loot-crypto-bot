@@ -273,7 +273,7 @@ def publish():
     pool, is_base, price, change_5m, change_24h = get_market_data()
 
     dot = "🟢" if change_5m >= 0 else "🔴"
-    message = f"${price:.8f} {dot}"
+    message = f"${price:.2f} {dot}"
 
     joke = choose_joke(change_24h)
     if joke:
