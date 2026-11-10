@@ -115,31 +115,7 @@ def api_get(path, params=None):
 
 
 def discover_pool():
-    result = api_get(
-        f"/networks/{NETWORK}/tokens/{TOKEN_ADDRESS}/pools",
-        {"page": 1}
-    )
-
-    pools = result.get("data", [])
-    if not pools:
-        raise RuntimeError("GeckoTerminal не нашёл пулы для указанного адреса")
-
-    pools.sort(
-        key=lambda item: float(
-            item.get("attributes", {}).get("reserve_in_usd") or 0
-        ),
-        reverse=True
-    )
-
-    for pool in pools:
-        attrs = pool.get("attributes", {})
-        base = (attrs.get("base_token_address") or "").lower()
-        quote = (attrs.get("quote_token_address") or "").lower()
-
-        if TOKEN_ADDRESS.lower() in (base, quote):
-            return attrs.get("address"), base == TOKEN_ADDRESS.lower()
-
-    raise RuntimeError("Не удалось определить пул GRAM")
+    return POOL_ADDRESS, True
 
 
 def get_market_data():
