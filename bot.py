@@ -285,9 +285,14 @@ def publish():
     dot = "🟢" if change_5m >= 0 else "🔴"
     message = f"${price:.2f} {dot}"
 
-    joke = choose_joke(change_24h)
-    if joke:
-        message += "\n" + joke
+    previous_price = get_previous_price()
+
+    if previous_price is not None and round(price, 2) != previous_price:
+        joke = choose_joke(change_24h)
+        if joke:
+            message += "\n" + joke
+
+    save_previous_price(price)
 
     now = datetime.now(timezone.utc)
 
