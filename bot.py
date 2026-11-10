@@ -268,6 +268,7 @@ def send_photo(filename, caption):
         raise RuntimeError(f"Telegram photo error: {result}")
 
 
+
 def publish():
     pool, is_base, price, change_5m, change_24h = get_market_data()
 
@@ -280,7 +281,7 @@ def publish():
 
     now = datetime.now(timezone.utc)
 
-    if now.minute < 5:
+    if now.minute == 0:
         try:
             chart = make_chart(pool, is_base)
             send_photo(chart, message)
@@ -297,7 +298,4 @@ def publish():
 
     print("GRAM price published successfully")
 
-
-if __name__ == "__main__":
-    publish()
 
