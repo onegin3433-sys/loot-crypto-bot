@@ -267,7 +267,17 @@ def send_photo(filename, caption):
     if not result.get("ok"):
         raise RuntimeError(f"Telegram photo error: {result}")
 
+def get_previous_price():
+    try:
+        with open("previous_price.txt", "r") as file:
+            return float(file.read().strip())
+    except (FileNotFoundError, ValueError):
+        return None
 
+
+def save_previous_price(price):
+    with open("previous_price.txt", "w") as file:
+        file.write(f"{price:.2f}")
 
 def publish():
     pool, is_base, price, change_5m, change_24h = get_market_data()
