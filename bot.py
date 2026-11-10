@@ -299,3 +299,6 @@ def publish():
     print("GRAM price published successfully")
 
 
+if __name__ == "__main__":
+    publish()
+    
