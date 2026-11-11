@@ -296,7 +296,7 @@ def publish():
 
     now = datetime.now(timezone.utc)
 
-    if now.minute == 0:
+    if now.minute == 59:
         try:
             chart = make_chart(pool, is_base)
             send_photo(chart, message)
