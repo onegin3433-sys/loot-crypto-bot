@@ -296,7 +296,7 @@ def publish():
 
     previous_price = get_previous_price()
 
-    if previous_price is None or round(price, 2) == previous_price:
+    if previous_price is None or price == previous_price:
         dot = "💎"
     elif price > previous_price:
         dot = "📈"
@@ -305,10 +305,13 @@ def publish():
 
     message = f"${price:.2f} {dot}"
 
-    if previous_price is not None and round(price, 2) != previous_price:
-        joke = choose_joke(change_24h)
-        if joke:
-            message += "\n" + joke
+    if previous_price is not None and previous_price > 0:
+        change_percent = ((price - previous_price) / previous_price) * 100
+
+        if abs(change_percent) >= 1:
+            joke = choose_joke(change_percent)
+            if joke:
+                message += "\n" + joke
 
     save_previous_price(price)
 
