@@ -307,8 +307,9 @@ def publish():
     save_previous_price(price)
 
     now = datetime.now(timezone.utc)
+current_hour = now.strftime("%Y-%m-%d %H")
 
-    if now.minute < 5:
+if get_last_chart_hour() != current_hour:
         try:
             chart = make_chart(pool, is_base)
             send_photo(chart, message)
