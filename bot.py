@@ -294,10 +294,14 @@ def save_last_chart_hour(hour):
 def publish():
     pool, is_base, price, change_5m, change_24h = get_market_data()
 
-    dot = "🟢" if change_5m >= 0 else "🔴"
-    message = f"${price:.2f} {dot}"
-
     previous_price = get_previous_price()
+
+if previous_price is None or round(price, 2) == previous_price:
+    dot = "💎"
+elif price > previous_price:
+    dot = "📈"
+else:
+    dot = "📉"
 
     if previous_price is not None and round(price, 2) != previous_price:
         joke = choose_joke(change_24h)
