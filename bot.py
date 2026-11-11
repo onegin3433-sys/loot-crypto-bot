@@ -279,6 +279,18 @@ def save_previous_price(price):
     with open("previous_price.txt", "w") as file:
         file.write(f"{price:.2f}")
 
+def get_last_chart_hour():
+    try:
+        with open("last_chart_hour.txt", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return None
+
+
+def save_last_chart_hour(hour):
+    with open("last_chart_hour.txt", "w") as file:
+        file.write(hour)
+
 def publish():
     pool, is_base, price, change_5m, change_24h = get_market_data()
 
