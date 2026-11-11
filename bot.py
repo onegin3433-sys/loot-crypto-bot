@@ -277,7 +277,7 @@ def get_previous_price():
 
 def save_previous_price(price):
     with open("previous_price.txt", "w") as file:
-        file.write(f"{price:.2f}")
+        file.write(f"{price:.12g}")
 
 def get_last_chart_hour():
     try:
