@@ -14,9 +14,10 @@ import matplotlib.dates as mdates
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
-API = "https://api.geckoterminal.com/api/v2"
-POOL_ADDRESS = "EQBPTSLamspzALssCkevAbqS2J3GtH7E5Z0tm6XI0DaPyWzE"
-NETWORK = "ton"
+API = "https://api.ston.fi/v1"
+POOL_ADDRESS = "EQCGScrZe1xbyWqWDvdI6mzP-GAcAWFv6ZXuaJOuSqemxku4"
+USDT_ADDRESS = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"
+TON_ADDRESS = "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c"
 
 JOKES = {
     "p1": [
@@ -119,25 +120,34 @@ def discover_pool():
 
 
 def get_market_data():
-    pool_address, is_base = discover_pool()
+    result = api_get(f"/pools/{POOL_ADDRESS}")
+    pool = result.get("pool", result)
 
-    result = api_get(
-        f"/networks/{NETWORK}/pools/{pool_address}"
-    )
-    attrs = result["data"]["attributes"]
+    token0 = pool.get("token0_address")
+    token1 = pool.get("token1_address")
+    if token0 != USDT_ADDRESS or token1 != TON_ADDRESS:
+        raise RuntimeError(
+            f"Неверная пара в пуле STON.fi: token0={token0}, token1={token1}"
+        )
 
-    price_key = "base_token_price_usd" if is_base else "quote_token_price_usd"
-    price = float(attrs[price_key])
+    reserve_usdt = int(pool["reserve0"]) / (10 ** 6)
+    reserve_gram = int(pool["reserve1"]) / (10 ** 9)
+    if reserve_usdt <= 0 or reserve_gram <= 0:
+        raise RuntimeError("STON.fi вернул пустые резервы пула")
 
-    changes = attrs.get("price_change_percentage", {})
-    change_5m = float(changes.get("m5") or 0)
-    change_24h = float(changes.get("h24") or 0)
+    # Цена GRAM (TON) в USDT по соотношению резервов пула.
+    price = reserve_usdt / reserve_gram
 
-    if not is_base:
-        change_5m = -change_5m / (1 + change_5m / 100) if change_5m != -100 else 0
-        change_24h = -change_24h / (1 + change_24h / 100) if change_24h != -100 else 0
+    history = load_price_history()
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    history.append({"time": now_ts, "price": price})
+    history = [
+        point for point in history
+        if now_ts - point["time"] <= 2 * 60 * 60
+    ]
+    save_price_history(history)
 
-    return pool_address, is_base, price, change_5m, change_24h
+    return POOL_ADDRESS, True, price, 0.0, 0.0
 
 
 def choose_joke(change):
@@ -167,29 +177,35 @@ def choose_joke(change):
     return random.choice(JOKES[group])
 
 
+def load_price_history():
+    try:
+        with open("gram_history.json", "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def save_price_history(history):
+    with open("gram_history.json", "w") as file:
+        json.dump(history, file)
+
+
 def make_chart(pool_address, is_base):
-    token_side = "base" if is_base else "quote"
-
-    result = api_get(
-        f"/networks/{NETWORK}/pools/{pool_address}/ohlcv/minute",
-        {
-            "aggregate": 1,
-            "limit": 60,
-            "currency": "usd",
-            "token": token_side,
-        }
-    )
-
-    rows = result.get("data", {}).get("attributes", {}).get("ohlcv_list", [])
-    if len(rows) < 2:
-        raise RuntimeError("Недостаточно данных для часового графика")
-
-    rows = sorted(rows, key=lambda row: row[0])
-    times = [
-        datetime.fromtimestamp(row[0], tz=timezone.utc)
-        for row in rows
+    history = load_price_history()
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    history = [
+        point for point in history
+        if now_ts - point["time"] <= 60 * 60
     ]
-    closes = [float(row[4]) for row in rows]
+    if len(history) < 2:
+        raise RuntimeError("Пока недостаточно точек для часового графика")
+
+    history.sort(key=lambda point: point["time"])
+    times = [
+        datetime.fromtimestamp(point["time"], tz=timezone.utc)
+        for point in history
+    ]
+    closes = [float(point["price"]) for point in history]
 
     plt.figure(figsize=(10, 5))
     plt.plot(times, closes, linewidth=2)
