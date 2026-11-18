@@ -350,14 +350,16 @@ def publish():
     current_hour = now.strftime("%Y-%m-%d %H")
 
     if get_last_chart_hour() != current_hour:
+        # Claim this hour before attempting the upload. This prevents retries
+        # every five minutes (and duplicate charts) if Telegram times out.
+        save_last_chart_hour(current_hour)
         try:
             chart = make_chart(pool, is_base)
             send_photo(chart, message)
-            save_last_chart_hour(current_hour)
             print("GRAM hourly chart published")
             return
         except Exception as error:
-            print(f"Chart error, sending text instead: {error}")
+            print(f"Chart attempt failed for {current_hour}; no retry this hour: {type(error).__name__}: {error}")
 
     telegram_request("sendMessage", {
         "chat_id": CHAT_ID,
