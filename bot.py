@@ -108,7 +108,12 @@ def api_get(path, params=None):
 
     request = urllib.request.Request(
         url,
-        headers={"Accept": "application/json"}
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (compatible; GRAMPriceBot/1.0)",
+            "Referer": "https://app.ston.fi/",
+            "Origin": "https://app.ston.fi",
+        }
     )
 
     with urllib.request.urlopen(request, timeout=25) as response:
