@@ -197,8 +197,8 @@ def make_chart(pool_address, is_base):
         point for point in history
         if now_ts - point["time"] <= 60 * 60
     ]
-    if len(history) < 2:
-        raise RuntimeError("Пока недостаточно точек для часового графика")
+    if len(history) < 2 or now_ts - history[0]["time"] < 50 * 60:
+        raise RuntimeError("Нужно накопить около часа точек для часового графика")
 
     history.sort(key=lambda point: point["time"])
     times = [
