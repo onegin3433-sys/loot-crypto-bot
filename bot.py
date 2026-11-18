@@ -317,24 +317,33 @@ def publish():
 
     previous_price = get_previous_price()
 
-    if previous_price is None or price == previous_price:
+    # Compare the same precision that is displayed in Telegram.
+    displayed_price = round(price, 2)
+    previous_displayed_price = (
+        round(previous_price, 2) if previous_price is not None else None
+    )
+
+    if previous_displayed_price is None or displayed_price == previous_displayed_price:
         dot = "💎"
-    elif price > previous_price:
+    elif displayed_price > previous_displayed_price:
         dot = "📈"
     else:
         dot = "📉"
 
-    message = f"${price:.2f} {dot}"
+    message = f"${displayed_price:.2f} {dot}"
 
-    if previous_price is not None and previous_price > 0:
-        change_percent = ((price - previous_price) / previous_price) * 100
+    if previous_displayed_price is not None and previous_displayed_price > 0:
+        change_percent = (
+            (displayed_price - previous_displayed_price)
+            / previous_displayed_price
+        ) * 100
 
         if abs(change_percent) >= 1:
             joke = choose_joke(change_percent)
             if joke:
                 message += "\n" + joke
 
-    save_previous_price(price)
+    save_previous_price(displayed_price)
 
     now = datetime.now(timezone.utc)
     current_hour = now.strftime("%Y-%m-%d %H")
