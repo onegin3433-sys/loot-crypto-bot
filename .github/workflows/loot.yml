@@ -35,4 +35,7 @@ jobs:
           if [ -f last_chart_hour.txt ]; then
             git add last_chart_hour.txt
           fi
+          if [ -f gram_history.json ]; then
+            git add gram_history.json
+          fi
           git diff --cached --quiet || (git commit -m "Update previous price" && git push)
