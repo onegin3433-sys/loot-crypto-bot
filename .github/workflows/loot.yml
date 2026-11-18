@@ -6,6 +6,11 @@ on:
 permissions:
   contents: write
 
+# Only one bot run may publish/update state at a time.
+concurrency:
+  group: gram-price-publisher
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
