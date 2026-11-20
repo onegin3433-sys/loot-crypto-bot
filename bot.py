@@ -282,8 +282,9 @@ def send_photo(filename, caption):
         }
     )
 
-    # Photo uploads can take longer than ordinary Telegram text requests.
-    with urllib.request.urlopen(request, timeout=120) as response:
+    # Telegram may take several minutes to finish processing a photo upload.
+    # Keep a single attempt per hour to avoid duplicate chart messages.
+    with urllib.request.urlopen(request, timeout=300) as response:
         result = json.loads(response.read())
 
     if not result.get("ok"):
